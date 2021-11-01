@@ -31,6 +31,7 @@ class FileListAdapter :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bindView(files[position])
+        holder.itemView.setOnClickListener{ (holder.itemView.context as AllFilesActivity).onItemClick(position) }
     }
 
     override fun getItemCount() = files.size

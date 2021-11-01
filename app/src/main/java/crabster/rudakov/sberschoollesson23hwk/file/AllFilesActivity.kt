@@ -11,6 +11,7 @@ import android.os.Environment
 import android.os.storage.StorageManager
 import android.provider.Settings
 import android.util.Log
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -18,7 +19,6 @@ import androidx.core.content.ContextCompat
 import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.viewbinding.BuildConfig
 import crabster.rudakov.sberschoollesson23hwk.BuildConfig.APPLICATION_ID
 import crabster.rudakov.sberschoollesson23hwk.databinding.ActivityAllFilesBinding
 import java.io.File
@@ -26,10 +26,10 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AllFilesActivity : AppCompatActivity() {
+class AllFilesActivity : AppCompatActivity(), OnItemClickListener {
     private lateinit var adapter: FileListAdapter
     private lateinit var binding: ActivityAllFilesBinding
-    private val pathFile = Environment.getExternalStorageDirectory()
+    private var pathFile = Environment.getExternalStorageDirectory()
     private var rootDocumentFile: DocumentFile? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,6 +49,8 @@ class AllFilesActivity : AppCompatActivity() {
         adapter = FileListAdapter()
         binding.recyclerView.adapter = adapter
         binding.addButton.setOnClickListener { addFile() }
+
+        binding.goBackToRootButton.setOnClickListener { goBackToRoot() }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -171,4 +173,35 @@ class AllFilesActivity : AppCompatActivity() {
         fun newIntent(context: Context) =
             Intent(context, AllFilesActivity::class.java)
     }
+
+    override fun onItemClick(position: Int) {
+        binding.goBackToRootButton.visibility = Button.VISIBLE
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+            rootDocumentFile?.listFiles()?.let {
+                rootDocumentFile = it[position]
+                listFiles()
+            }
+        } else {
+            pathFile.listFiles()?.let {
+                pathFile = it[position]
+                listFiles()
+            }
+        }
+    }
+
+    private fun goBackToRoot() {
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+            rootDocumentFile?.parentFile?.let {
+                rootDocumentFile = it
+                listFiles()
+            }
+        } else {
+            pathFile.parentFile?.let {
+                pathFile = it
+                listFiles()
+            }
+        }
+        binding.goBackToRootButton.visibility = Button.INVISIBLE
+    }
+
 }
